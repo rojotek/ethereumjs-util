@@ -41,6 +41,12 @@ export const defineProperties = function(self: any, fields: any, data: any) {
       return self.raw[i]
     }
     function setter(v: any) {
+      if (field.bufferArray) {
+        v = v.map(toBuffer);
+      } else {
+        v = toBuffer(v);
+      }
+
       v = toBuffer(v)
 
       if (v.toString('hex') === '00' && !field.allowZero) {
@@ -102,7 +108,13 @@ export const defineProperties = function(self: any, fields: any, data: any) {
 
       // make sure all the items are buffers
       data.forEach((d, i) => {
-        self[self._fields[i]] = toBuffer(d)
+        let v;
+        if (fields[i].bufferArray) {
+          v = d.map(toBuffer);
+        } else {
+          v = toBuffer(d);
+        }
+        self[self._fields[i]] = v;
       })
     } else if (typeof data === 'object') {
       const keys = Object.keys(data)
